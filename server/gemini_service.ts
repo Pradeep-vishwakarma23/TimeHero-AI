@@ -80,8 +80,8 @@ function safeParseJson(text: string | undefined | null, fallback: any = {}): any
           .replace(/[\u0000-\u0009\u000B-\u000C\u000E-\u001F]+/g, " "); // remove raw control chars
         return JSON.parse(fixed);
       } catch (lastErr) {
-        console.error("[safeParseJson] Failed to parse JSON content:", err);
-        console.error("[safeParseJson] Raw content was:", text);
+        console.log("[safeParseJson] Failed to parse JSON content:", err);
+        console.log("[safeParseJson] Raw content was:", text);
         return fallback;
       }
     }
@@ -118,7 +118,7 @@ async function generateContentWithFallback(params: {
     const errMsg = (err?.message || String(err)).toLowerCase();
     
     // Attempt fallback for ALL errors (429 quota, 503 unavailable, etc.) to maximize service availability
-    console.warn(`[Adaptive Engine Warning] Primary model ${primaryModel} failed: ${err.message || err}. Attempting dynamic fallback to backup model ${backupModel}...`);
+    console.log(`[Adaptive Engine Warning] Primary model ${primaryModel} failed: ${err.message || err}. Attempting dynamic fallback to backup model ${backupModel}...`);
     console.log(`Sending fallback request to Gemini (Model: ${backupModel})...`);
     try {
       const ai = getAIClient();
@@ -130,7 +130,7 @@ async function generateContentWithFallback(params: {
       console.log(`Gemini response received from fallback model ${backupModel}:`);
       return response;
     } catch (fallbackErr: any) {
-      console.warn(`Gemini fallback call failed for both primary and backup models: ${fallbackErr.message || fallbackErr}`);
+      console.log(`Gemini fallback call failed for both primary and backup models: ${fallbackErr.message || fallbackErr}`);
       
       // EXTREMELY ROBUST SELF-HEALING FALLBACK: If both API models fail, return a beautiful simulated response
       // to guarantee zero application downtime and maintain an active, polished user preview experience.

@@ -324,32 +324,13 @@ export async function getDb() {
         const recoverySuccess = attemptRecovery();
         
         if (!recoverySuccess) {
-          logEvent("CRITICAL", "Automatic recovery FAILED! Automatically starting with a clean database to restore service.");
-          
-          if (fs.existsSync(DB_PATH)) {
-            try {
-              fs.renameSync(DB_PATH, `${DB_PATH}.abandoned_${Date.now()}`);
-            } catch (e) {}
-          }
-          if (fs.existsSync(LIVE_BACKUP_PATH)) {
-            try {
-              fs.renameSync(LIVE_BACKUP_PATH, `${LIVE_BACKUP_PATH}.abandoned_${Date.now()}`);
-            } catch (e) {}
-          }
+          logEvent("CRITICAL", "Automatic recovery FAILED! Starting in Recovery Mode.");
           
           dbInstance = new SQL.Database();
           initAuthDbSchema(dbInstance);
           
-          try {
-            const data = dbInstance.export();
-            const buffer = Buffer.from(data);
-            fs.writeFileSync(DB_PATH, buffer);
-          } catch (writeErr) {
-            logEvent("WARNING", `Failed to save fresh DB: ${writeErr}`);
-          }
-          
-          dbState.status = "healthy";
-          dbState.isRecoveryMode = false;
+          dbState.status = "compromised";
+          dbState.isRecoveryMode = true;
         }
       }
     } else {
@@ -359,27 +340,13 @@ export async function getDb() {
         const recoverySuccess = attemptRecovery();
         
         if (!recoverySuccess) {
-          logEvent("CRITICAL", "Database file is missing, and automatic recovery FAILED! Automatically starting with a clean database to restore service.");
-          
-          if (fs.existsSync(LIVE_BACKUP_PATH)) {
-            try {
-              fs.renameSync(LIVE_BACKUP_PATH, `${LIVE_BACKUP_PATH}.abandoned_${Date.now()}`);
-            } catch (e) {}
-          }
+          logEvent("CRITICAL", "Database file is missing, and automatic recovery FAILED! Starting in Recovery Mode.");
           
           dbInstance = new SQL.Database();
           initAuthDbSchema(dbInstance);
           
-          try {
-            const data = dbInstance.export();
-            const buffer = Buffer.from(data);
-            fs.writeFileSync(DB_PATH, buffer);
-          } catch (writeErr) {
-            logEvent("WARNING", `Failed to save fresh DB: ${writeErr}`);
-          }
-          
-          dbState.status = "healthy";
-          dbState.isRecoveryMode = false;
+          dbState.status = "compromised";
+          dbState.isRecoveryMode = true;
         }
       } else {
         // Clean start: File didn't exist or was empty, and there is no history of any prior installation

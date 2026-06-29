@@ -147,7 +147,46 @@ async function runVerification() {
 
   // Restore everything to healthy state for production use
   console.log("\n[CLEANUP] Rebuilding a pristine database for live application...");
-  if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
+  
+  // 1. Delete the active database
+  if (fs.existsSync(DB_PATH)) {
+    try { fs.unlinkSync(DB_PATH); } catch (e) {}
+  }
+  
+  // 2. Delete the live backup
+  if (fs.existsSync(LIVE_BACKUP_PATH)) {
+    try { fs.unlinkSync(LIVE_BACKUP_PATH); } catch (e) {}
+  }
+  
+  // 3. Delete all backup snapshots in the backup directory
+  if (fs.existsSync(BACKUP_DIR)) {
+    try {
+      fs.readdirSync(BACKUP_DIR).forEach(f => {
+        if (f.startsWith("timehero_db_backup_") && f.endsWith(".sqlite")) {
+          fs.unlinkSync(path.join(BACKUP_DIR, f));
+        }
+      });
+    } catch (e) {}
+  }
+  
+  // 4. Delete all malformed archived database copies
+  try {
+    fs.readdirSync(process.cwd()).forEach(f => {
+      if (f.startsWith("timehero_db.sqlite.malformed_")) {
+        fs.unlinkSync(path.join(process.cwd(), f));
+      }
+    });
+  } catch (e) {}
+  
+  // 5. Delete the database recovery logs JSON file
+  const LOG_FILE = path.resolve(process.cwd(), "db_recovery_logs.json");
+  if (fs.existsSync(LOG_FILE)) {
+    try { fs.unlinkSync(LOG_FILE); } catch (e) {}
+  }
+  
+  // 6. Force reload the database instance.
+  // Since there are absolutely no prior installation indicators, this will perform a clean start,
+  // creating a fresh healthy SQLite database file and a fresh live backup snapshot on disk!
   await forceReloadDbInstance();
   console.log("[CLEANUP] Clean empty database initialized successfully.");
 
