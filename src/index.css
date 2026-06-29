@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Hide default browser scrollbars globally to achieve a premium Notion/Linear/Vercel aesthetic */
+html,
+body,
+#root,
+aside,
+main,
+div,
+section,
+table,
+tbody,
+thead,
+tr,
+td,
+pre,
+textarea,
+* {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+}
+
+/* Hide scrollbars for WebKit-based browsers (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar,
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+aside::-webkit-scrollbar,
+main::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important; /* Make scrollbar spacer invisible */
+  display: none !important;
+}
+
+/* Premium KPI Cards Grid Class */
+.kpi-grid {
+  display: grid !important;
+  gap: 24px !important;
+  grid-template-columns: repeat(1, minmax(0, 1fr)) !important; /* Mobile: 1 card */
+}
+
+@media (min-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* Mobile: 2 cards */
+  }
+}
+
+@media (min-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important; /* Tablet: 3 cards */
+  }
+}
+
+@media (min-width: 1200px) {
+  .kpi-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important; /* Laptop & Desktop: 5 cards */
+  }
+}
+
+

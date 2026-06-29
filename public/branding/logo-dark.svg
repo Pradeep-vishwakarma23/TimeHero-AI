@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 650" width="100%" height="100%">
+  <defs>
+    <!-- Beautiful gradient matching the uploaded logo -->
+    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="30%" stop-color="#4facfe" />
+      <stop offset="70%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+  </defs>
+  
+  <g transform="translate(44, 20)">
+    <!-- SVG Logo Mark content (scaled down and centered) -->
+    <g transform="scale(0.8) translate(64, 0)">
+      <!-- Speed Lines on the left -->
+      <line x1="60" y1="180" x2="120" y2="180" stroke="url(#logo-gradient)" stroke-width="8" stroke-linecap="round" opacity="0.8" />
+      <line x1="40" y1="215" x2="135" y2="215" stroke="url(#logo-gradient)" stroke-width="8" stroke-linecap="round" />
+      <line x1="20" y1="256" x2="135" y2="256" stroke="url(#logo-gradient)" stroke-width="8" stroke-linecap="round" />
+      <line x1="40" y1="297" x2="125" y2="297" stroke="url(#logo-gradient)" stroke-width="8" stroke-linecap="round" />
+      <line x1="60" y1="332" x2="110" y2="332" stroke="url(#logo-gradient)" stroke-width="8" stroke-linecap="round" opacity="0.8" />
+
+      <!-- Clock Face / Outline of Head -->
+      <path d="M 256,116 
+               A 140,140 0 0,0 256,396
+               C 290,396 320,380 340,360
+               C 350,350 360,345 370,340
+               C 385,335 390,325 395,310
+               C 400,295 408,290 412,280
+               C 416,270 412,260 408,256
+               C 415,250 422,240 422,225
+               C 422,210 415,200 405,195
+               C 395,190 390,175 385,160
+               C 380,145 370,135 355,125
+               C 330,110 295,116 256,116 Z" 
+            fill="none" 
+            stroke="url(#logo-gradient)" 
+            stroke-width="12" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" />
+
+      <!-- Clock Inner Elements -->
+      <path d="M 256,256 L 196,210" stroke="url(#logo-gradient)" stroke-width="10" stroke-linecap="round" />
+      <path d="M 256,256 L 316,196" stroke="url(#logo-gradient)" stroke-width="10" stroke-linecap="round" />
+      <circle cx="256" cy="256" r="14" fill="#0b0f19" stroke="url(#logo-gradient)" stroke-width="8" />
+
+      <!-- Clock Ticks -->
+      <line x1="256" y1="134" x2="256" y2="150" stroke="url(#logo-gradient)" stroke-width="6" stroke-linecap="round" />
+      <line x1="256" y1="362" x2="256" y2="378" stroke="url(#logo-gradient)" stroke-width="6" stroke-linecap="round" />
+      <line x1="134" y1="256" x2="150" y2="256" stroke="url(#logo-gradient)" stroke-width="6" stroke-linecap="round" />
+
+      <!-- Circuit Brain Elements -->
+      <path d="M 310,210 L 340,210 L 355,195" fill="none" stroke="url(#logo-gradient)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="355" cy="195" r="6" fill="url(#logo-gradient)" />
+      
+      <path d="M 320,256 L 360,256" fill="none" stroke="url(#logo-gradient)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="360" cy="256" r="6" fill="url(#logo-gradient)" />
+
+      <path d="M 310,300 L 340,300 L 350,315" fill="none" stroke="url(#logo-gradient)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="350" cy="315" r="6" fill="url(#logo-gradient)" />
+
+      <path d="M 325,230 L 345,245" fill="none" stroke="url(#logo-gradient)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="345" cy="245" r="5" fill="url(#logo-gradient)" />
+
+      <path d="M 325,280 L 345,265" fill="none" stroke="url(#logo-gradient)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="345" cy="265" r="5" fill="url(#logo-gradient)" />
+    </g>
+    
+    <!-- Text Section -->
+    <g transform="translate(0, 420)">
+      <!-- TimeHero Text -->
+      <text x="256" y="50" font-family="'Inter', system-ui, sans-serif" font-weight="900" font-size="64" fill="#ffffff" text-anchor="middle">
+        Time<tspan fill="url(#logo-gradient)">Hero</tspan>
+      </text>
+      <!-- AI Superscript-like accent -->
+      <text x="410" y="25" font-family="'Inter', system-ui, sans-serif" font-weight="900" font-size="28" fill="#8b5cf6">AI</text>
+      
+      <!-- Slogan -->
+      <line x1="30" y1="100" x2="130" y2="100" stroke="#334155" stroke-width="2" />
+      <text x="256" y="105" font-family="'Inter', system-ui, sans-serif" font-weight="800" font-size="14" fill="#94a3b8" letter-spacing="2.5" text-anchor="middle">
+        PLAN SMART. FOCUS DEEP. ACHIEVE MORE.
+      </text>
+      <line x1="382" y1="100" x2="482" y2="100" stroke="#334155" stroke-width="2" />
+    </g>
+  </g>
+</svg>

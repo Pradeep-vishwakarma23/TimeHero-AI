@@ -1,0 +1,12 @@
+# TimeHero AI - Python / Streamlit Requirements (Legacy/Reference Only)
+# The production-ready TimeHero AI application is written in full-stack TypeScript (Express + Vite + React)
+# with a SQLite database layer for peak performance and visual quality.
+#
+# If you are looking to run the legacy Streamlit version, these were the dependencies:
+streamlit>=1.30.0
+plotly>=5.18.0
+pandas>=2.1.0
+numpy>=1.26.0
+google-genai>=0.1.0
+sqlite3
+python-dotenv>=1.0.0

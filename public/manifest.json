@@ -1,0 +1,25 @@
+{
+  "short_name": "TimeHero AI",
+  "name": "TimeHero AI Productivity Workspace",
+  "icons": [
+    {
+      "src": "/branding/favicon-16.png",
+      "type": "image/png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "/branding/favicon-32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "/branding/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#050505",
+  "theme_color": "#8b5cf6",
+  "display": "standalone"
+}

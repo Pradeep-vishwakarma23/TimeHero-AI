@@ -1,0 +1,6 @@
+{
+  "name": "TimeHero AI",
+  "description": "From Deadlines to Done. An AI-powered productivity companion that helps you prioritize, plan, and complete work.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
