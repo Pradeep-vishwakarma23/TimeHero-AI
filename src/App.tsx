@@ -145,11 +145,8 @@ export default function App() {
     showToast("Logged out successfully.", "info");
   };
   
-  // Daily Streak gamification state loaded from localStorage
-  const [streak, setStreak] = useState<number>(() => {
-    const saved = localStorage.getItem("timehero_streak");
-    return saved ? parseInt(saved, 10) : 5; // Default streak
-  });
+  // Daily Streak calculated dynamically from live activity on the server
+  const [streak, setStreak] = useState<number>(0);
 
   // Global Toast list state
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -173,12 +170,13 @@ export default function App() {
     return () => window.removeEventListener("timehero-toast" as any, handleToastEvent);
   }, []);
 
-  const fetchTasksAndStats = async () => {
+  const fetchTasksAndStats = async (): Promise<void> => {
     try {
       setLoading(true);
+      const todayParam = new Date().toLocaleDateString('en-CA');
       const [tasksRes, statsRes] = await Promise.all([
         fetch("/api/tasks"),
-        fetch("/api/statistics")
+        fetch(`/api/statistics?today=${todayParam}`)
       ]);
 
       if (tasksRes.ok && statsRes.ok) {
@@ -186,6 +184,9 @@ export default function App() {
         const statsData = await statsRes.json();
         setTasks(tasksData);
         setStats(statsData);
+        if (statsData && typeof statsData.streak === 'number') {
+          setStreak(statsData.streak);
+        }
       }
     } catch (err) {
       console.error("Error loading application states:", err);
@@ -205,16 +206,26 @@ export default function App() {
         method: "POST"
       });
       if (res.ok) {
-        // Increment streak gamification
-        const newStreak = streak + 1;
-        setStreak(newStreak);
-        localStorage.setItem("timehero_streak", String(newStreak));
-
         // Find completed task name
         const targetTask = tasks.find((t) => t.id === id);
         const taskName = targetTask ? targetTask.task : "Task";
 
-        showToast(`🎉 Completed: "${taskName}"! Streak extended to ${newStreak} days!`, "success");
+        // Query the statistics endpoint to grab the fresh streak value
+        let currentStreakVal = streak;
+        try {
+          const todayParam = new Date().toLocaleDateString('en-CA');
+          const statsRes = await fetch(`/api/statistics?today=${todayParam}`);
+          if (statsRes.ok) {
+            const statsData = await statsRes.json();
+            if (statsData && typeof statsData.streak === 'number') {
+              currentStreakVal = statsData.streak;
+            }
+          }
+        } catch (fetchErr) {
+          console.error("Error fetching fresh streak for toast:", fetchErr);
+        }
+
+        showToast(`🎉 Completed: "${taskName}"! Streak extended to ${currentStreakVal} days!`, "success");
         
         await fetchTasksAndStats();
       }

@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs/promises";
-import { saveTaskHistory } from "./auth_db.js";
+import { saveTaskHistory, logUserActivity } from "./auth_db.js";
 
 const DB_PATH = path.resolve(process.cwd(), "timehero_db.json");
 
@@ -282,6 +282,7 @@ export async function createTask(userId: string, task: Omit<Task, "id" | "userId
 
   try {
     await saveTaskHistory(newId, userId, "Task Created", `Task "${task.task}" was created.`, isAi ? "AI" : "Manual");
+    await logUserActivity(userId, "Task Created");
   } catch (err) {
     console.error("Error saving task history on create:", err);
   }
@@ -362,6 +363,13 @@ export async function updateTask(userId: string, id: number, updates: Partial<Ta
       }
       if (statusChanged) {
         await saveTaskHistory(id, userId, "Status Changed", `Changed status from "${current.status}" to "${updates.status}".`, isAi ? "AI" : "Manual");
+        if (updates.status === "Completed") {
+          try {
+            await logUserActivity(userId, "Task Completed");
+          } catch (err) {
+            console.error("Error logging task completed activity on update:", err);
+          }
+        }
       }
       if (progressChanged) {
         await saveTaskHistory(id, userId, "Progress Changed", `Changed progress from ${current.progress}% to ${updates.progress}%.`, isAi ? "AI" : "Manual");
@@ -414,6 +422,7 @@ export async function completeTask(userId: string, id: number, performedBy: stri
 
     try {
       await saveTaskHistory(id, userId, "Completed", `Task completed (previously "${prevStatus}").`, performedBy);
+      await logUserActivity(userId, "Task Completed");
     } catch (err) {
       console.error("Error saving task history on complete:", err);
     }

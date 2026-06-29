@@ -9,7 +9,7 @@ import { createServer as createViteServer } from "vite";
 import bcryptjs from "bcryptjs";
 import { initDb, getTasks, createTask, updateTask, deleteTask, completeTask, getDashboardStatistics, getUserAIIntelligence, saveUserAIIntelligence } from "./server/database.js";
 import { generateTaskPlan, futurePrediction, aiCoach, productivityInsights, generateRecoveryPlanInGemini, generateSmartNotification, generateSmartEmailSubject, generateDailyBriefAI, generateWeeklyReportAI, generateCalendarSmartSuggestions, generateCalendarRecommendations, generateAIDailyPlan, processVoiceInput, generateExportSummary, generateTaskRecommendations } from "./server/gemini_service.js";
-import { initAuthDb, createUser, getUserByEmail, getUserById, createSession, getSession, deleteSession, updateLastLogin, saveRecoveryPlan, getLatestRecoveryPlan, saveNotification, getNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification, clearAllNotifications, saveEmailLog, updateEmailLogStatus, getEmailLogs, getNotificationPreferences, saveNotificationPreferences, saveGoogleCalendarTokens, getGoogleCalendarTokens, deleteGoogleCalendarTokens, saveCachedEvents, getCachedEvents, saveCalendarSyncTimestamp, getCalendarSyncTimestamp, saveCalendarPreferences, getCalendarPreferences, saveVoiceHistory, getVoiceHistory, saveExportHistory, getExportHistory, createPasswordResetToken, getPasswordResetToken, markPasswordResetTokenUsed, invalidateUserPasswordResetTokens, deleteSessionsByUserId, updateUserPassword, saveTaskHistory, getTaskHistory, getRecentTaskHistory, getCategories, createCategory, updateCategory, deleteCategory, getDbState, forceReloadDbInstance, dbState, logEvent } from "./server/auth_db.js";
+import { initAuthDb, createUser, getUserByEmail, getUserById, createSession, getSession, deleteSession, updateLastLogin, saveRecoveryPlan, getLatestRecoveryPlan, saveNotification, getNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification, clearAllNotifications, saveEmailLog, updateEmailLogStatus, getEmailLogs, getNotificationPreferences, saveNotificationPreferences, saveGoogleCalendarTokens, getGoogleCalendarTokens, deleteGoogleCalendarTokens, saveCachedEvents, getCachedEvents, saveCalendarSyncTimestamp, getCalendarSyncTimestamp, saveCalendarPreferences, getCalendarPreferences, saveVoiceHistory, getVoiceHistory, saveExportHistory, getExportHistory, createPasswordResetToken, getPasswordResetToken, markPasswordResetTokenUsed, invalidateUserPasswordResetTokens, deleteSessionsByUserId, updateUserPassword, saveTaskHistory, getTaskHistory, getRecentTaskHistory, getCategories, createCategory, updateCategory, deleteCategory, getDbState, forceReloadDbInstance, dbState, logEvent, getUserStreak, logUserActivity } from "./server/auth_db.js";
 import { sendEmailBackground, getPremiumEmailHtml, getDebugEmails } from "./server/email_service.js";
 
 async function startServer() {
@@ -969,7 +969,10 @@ async function startServer() {
   app.get("/api/statistics", requireAuth, async (req, res) => {
     try {
       const userId = (req as any).user.id;
+      const clientToday = (req.query.today as string) || new Date().toISOString().split("T")[0];
       const stats = await getDashboardStatistics(userId);
+      const streakVal = await getUserStreak(userId, clientToday);
+      stats.streak = streakVal;
       res.json(stats);
     } catch (err: any) {
       console.error("Error getting statistics:", err);
@@ -980,8 +983,14 @@ async function startServer() {
   // API Route: AI Task Planner breakdown
   app.post("/api/planner", requireAuth, async (req, res) => {
     try {
+      const userId = (req as any).user.id;
       const { taskName, context, deadline, priority, effort } = req.body;
       const plan = await generateTaskPlan(taskName, context, deadline, priority, effort);
+      try {
+        await logUserActivity(userId, "AI Planner Used");
+      } catch (logErr) {
+        console.error("Error logging AI Planner activity:", logErr);
+      }
       res.json(plan);
     } catch (err: any) {
       console.error("Error generating task plan via Gemini:", err);
@@ -1039,6 +1048,12 @@ async function startServer() {
     try {
       const targetUserId = (req as any).user.id;
       const { transcript, history } = req.body;
+
+      try {
+        await logUserActivity(targetUserId, "Voice AI Processing");
+      } catch (logErr) {
+        console.error("Error logging Voice AI activity:", logErr);
+      }
 
       if (!transcript || !transcript.trim()) {
         return res.status(400).json({ error: "Transcript is required." });
@@ -2033,6 +2048,11 @@ async function startServer() {
           const events = data.items || [];
           await saveCachedEvents(userId, events);
           await saveCalendarSyncTimestamp(userId, new Date().toISOString());
+          try {
+            await logUserActivity(userId, "Calendar Sync");
+          } catch (logErr) {
+            console.error("Error logging Calendar Sync activity:", logErr);
+          }
           return res.json({ connected: true, events, synced: true });
         } else {
           console.error("Failed to fetch events from Google:", await calendarRes.text());
@@ -2128,6 +2148,12 @@ async function startServer() {
         throw new Error(`Failed to create Google Calendar event: ${await calendarRes.text()}`);
       }
       
+      try {
+        await logUserActivity(userId, "Calendar Sync");
+      } catch (logErr) {
+        console.error("Error logging Calendar Sync activity:", logErr);
+      }
+
       res.json({ success: true, event: await calendarRes.json() });
     } catch (err: any) {
       res.status(500).json({ error: err.message });

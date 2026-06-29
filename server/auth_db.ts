@@ -643,6 +643,15 @@ export function initAuthDbSchema(db: any): void {
       UNIQUE(user_id, name)
     )`
   );
+
+  db.run(
+    `CREATE TABLE IF NOT EXISTS user_activity (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      activity_type TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    )`
+  );
 }
 
 export async function initAuthDb(): Promise<void> {
@@ -878,6 +887,64 @@ export async function getRecentTaskHistory(userId: string, limit: number = 10): 
   return results;
 }
 
+export async function logUserActivity(userId: string, activityType: string): Promise<void> {
+  const db = await getDb();
+  const now = new Date().toISOString();
+  db.run(
+    `INSERT INTO user_activity (user_id, activity_type, created_at) VALUES (?, ?, ?)`,
+    [userId, activityType, now]
+  );
+  saveDb();
+}
+
+export function getPastDateString(baseDateStr: string, daysAgo: number): string {
+  const [year, month, day] = baseDateStr.split('-').map(Number);
+  const d = new Date(year, month - 1, day);
+  d.setDate(d.getDate() - daysAgo);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dateVal = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dateVal}`;
+}
+
+export async function getUserStreak(userId: string, todayStr: string): Promise<number> {
+  const db = await getDb();
+  
+  const stmt = db.prepare(`SELECT DISTINCT substr(created_at, 1, 10) as adate FROM user_activity WHERE user_id = ? ORDER BY adate DESC`);
+  stmt.bind([userId]);
+  const dates: string[] = [];
+  while (stmt.step()) {
+    const row = stmt.getAsObject();
+    dates.push(String(row.adate));
+  }
+  stmt.free();
+  
+  const datesSet = new Set(dates);
+  
+  const hasToday = datesSet.has(todayStr);
+  const yesterdayStr = getPastDateString(todayStr, 1);
+  const hasYesterday = datesSet.has(yesterdayStr);
+  
+  if (!hasToday && !hasYesterday) {
+    return 0;
+  }
+  
+  let streak = 0;
+  let currentDaysAgo = hasToday ? 0 : 1;
+  
+  while (true) {
+    const checkDate = getPastDateString(todayStr, currentDaysAgo);
+    if (datesSet.has(checkDate)) {
+      streak++;
+      currentDaysAgo++;
+    } else {
+      break;
+    }
+  }
+  
+  return streak;
+}
+
 export async function getUserById(id: number): Promise<User | null> {
   const db = await getDb();
   const stmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
@@ -961,6 +1028,16 @@ export async function updateLastLogin(id: number): Promise<void> {
   );
   
   saveDb();
+
+  try {
+    db.run(
+      `INSERT INTO user_activity (user_id, activity_type, created_at) VALUES (?, ?, ?)`,
+      [String(id), "Login", now]
+    );
+    saveDb();
+  } catch (err) {
+    console.error("Error logging user login activity:", err);
+  }
 }
 
 export async function saveNotification(
